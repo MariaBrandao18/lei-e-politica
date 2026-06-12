@@ -1,0 +1,27 @@
+# Ambiente virtual
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Credenciais
+.env
+.env.*
+
+# Dados (não versionar — coleta é cara)
+data/raw/
+data/processed/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Frontend
+frontend/.next/
+frontend/node_modules/
+
+# Sistema
+.DS_Store
+*.egg-info/
+dist/
+build/
