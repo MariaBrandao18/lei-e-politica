@@ -31,21 +31,44 @@ def _get_com_retry(
     params: Optional[dict] = None,
     headers: Optional[dict] = None,
     tentativas: int = 3,
-    backoff: float = 2.0,
+    backoff: float = 5.0,
 ) -> requests.Response:
-    """GET com retry em erros 5xx e timeout."""
+    """
+    GET com retry em erros 5xx e timeout.
+    Retorna a última resposta recebida (mesmo que seja 5xx) para que
+    o chamador decida o que fazer — nunca levanta HTTPError sozinho.
+    Levanta ConnectionError apenas se TODAS as tentativas falharam
+    por exceção de rede (sem resposta HTTP alguma).
+    """
+    ultimo_resp: Optional[requests.Response] = None
+    ultimo_exc: Optional[Exception] = None
+
     for i in range(tentativas):
         try:
             resp = requests.get(url, params=params, headers=headers, timeout=30)
+            ultimo_resp = resp
             if resp.status_code < 500:
                 return resp
-            log.warning("HTTP %s em %s (tentativa %d/%d)", resp.status_code, url, i + 1, tentativas)
+            log.warning(
+                "HTTP %s em %s (tentativa %d/%d)",
+                resp.status_code, url, i + 1, tentativas,
+            )
         except requests.RequestException as exc:
-            log.warning("Erro de conexão em %s: %s (tentativa %d/%d)", url, exc, i + 1, tentativas)
+            ultimo_exc = exc
+            log.warning(
+                "Erro de conexão em %s: %s (tentativa %d/%d)",
+                url, exc, i + 1, tentativas,
+            )
         if i < tentativas - 1:
-            time.sleep(backoff * (i + 1))
-    resp.raise_for_status()
-    return resp
+            espera = backoff * (i + 1)
+            log.info("Aguardando %.0fs antes de tentar novamente...", espera)
+            time.sleep(espera)
+
+    if ultimo_resp is not None:
+        return ultimo_resp  # 5xx — chamador trata com status_code != 200
+    raise requests.ConnectionError(
+        f"Todas as {tentativas} tentativas falharam sem resposta HTTP: {ultimo_exc}"
+    )
 
 
 # ------------------------------------------------------------------ #
