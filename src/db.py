@@ -1,12 +1,6 @@
 """
 Cliente Supabase e helpers de upsert para o pipeline.
 Usa a service role key — nunca expor no frontend.
-
-Estratégia de idempotência sem `on_conflict` URL param
-(incompatível com PostgREST 12.x do Supabase):
-- parlamentares / proposicoes / votacoes: pré-busca IDs existentes e
-  popula o campo `id` antes do upsert, que então resolve pelo PK.
-- votos: delete-by-votacao_id + insert (idempotente e eficiente em lotes).
 """
 
 import os
@@ -36,10 +30,19 @@ def get_client() -> Client:
 # Helpers internos
 # ------------------------------------------------------------------ #
 
+def _dedup(registros: list[dict], *chaves: str) -> list[dict]:
+    """Remove duplicatas mantendo o último registro por chave composta."""
+    vistos: dict = {}
+    for r in registros:
+        k = tuple(r[c] for c in chaves)
+        vistos[k] = r
+    return list(vistos.values())
+
+
 def _paginar_select(tabela: str, colunas: str, lote: int = 1000) -> list[dict]:
-    """Busca todos os registros de uma tabela paginando pelo range do PostgREST."""
+    """Busca todos os registros paginando via range do PostgREST."""
     client = get_client()
-    resultados = []
+    resultados: list[dict] = []
     offset = 0
     while True:
         resp = (
@@ -56,71 +59,38 @@ def _paginar_select(tabela: str, colunas: str, lote: int = 1000) -> list[dict]:
     return resultados
 
 
-def _upsert_com_id(tabela: str, registros: list[dict], chave_fn) -> int:
-    """
-    Upsert genérico baseado no PK interno.
-    chave_fn: função que recebe um registro existente e retorna a chave de lookup.
-    Pré-busca IDs existentes e popula `id` nos registros antes do upsert.
-    """
-    if not registros:
-        return 0
-    client = get_client()
-
-    # Pré-busca todos os IDs existentes
-    existentes = _paginar_select(tabela, "id,id_externo,casa")
-    mapa = {chave_fn(r): r["id"] for r in existentes}
-
-    for r in registros:
-        pk = chave_fn(r)
-        if pk in mapa:
-            r["id"] = mapa[pk]
-        # sem `id` → INSERT; com `id` → UPDATE pelo PK
-
-    lote = 500
-    total = 0
-    for i in range(0, len(registros), lote):
-        chunk = registros[i : i + lote]
-        client.table(tabela).upsert(chunk).execute()
-        total += len(chunk)
-    return total
-
-
 # ------------------------------------------------------------------ #
 # Upserts públicos
 # ------------------------------------------------------------------ #
 
 def upsert_parlamentares(registros: list[dict]) -> int:
     """Insere ou atualiza parlamentares. Chave lógica: (id_externo, casa)."""
-    total = _upsert_com_id(
-        "parlamentares",
-        registros,
-        chave_fn=lambda r: (r["id_externo"], r["casa"]),
-    )
-    log.info("upsert parlamentares: %d registros", total)
-    return total
+    if not registros:
+        return 0
+    unicos = _dedup(registros, "id_externo", "casa")
+    client = get_client()
+    client.table("parlamentares").upsert(
+        unicos, on_conflict="id_externo,casa"
+    ).execute()
+    log.info("upsert parlamentares: %d registros", len(unicos))
+    return len(unicos)
 
 
 def upsert_proposicoes(registros: list[dict]) -> int:
     """Insere ou atualiza proposições. Chave lógica: (id_externo, casa)."""
     if not registros:
         return 0
+    unicos = _dedup(registros, "id_externo", "casa")
     client = get_client()
-
-    existentes = _paginar_select("proposicoes", "id,id_externo,casa")
-    mapa = {(r["id_externo"], r["casa"]): r["id"] for r in existentes}
-
-    for r in registros:
-        pk = (r["id_externo"], r["casa"])
-        if pk in mapa:
-            r["id"] = mapa[pk]
-
     lote = 500
     total = 0
-    for i in range(0, len(registros), lote):
-        chunk = registros[i : i + lote]
-        client.table("proposicoes").upsert(chunk).execute()
+    for i in range(0, len(unicos), lote):
+        chunk = unicos[i : i + lote]
+        client.table("proposicoes").upsert(
+            chunk, on_conflict="id_externo,casa"
+        ).execute()
         total += len(chunk)
-        log.info("  proposicoes: %d/%d", total, len(registros))
+        log.info("  proposicoes: %d/%d", total, len(unicos))
     return total
 
 
@@ -128,20 +98,15 @@ def upsert_votacoes(registros: list[dict]) -> int:
     """Insere ou atualiza votações. Chave lógica: id_externo (alfanumérico)."""
     if not registros:
         return 0
+    unicos = _dedup(registros, "id_externo")
     client = get_client()
-
-    existentes = _paginar_select("votacoes", "id,id_externo")
-    mapa = {r["id_externo"]: r["id"] for r in existentes}
-
-    for r in registros:
-        if r["id_externo"] in mapa:
-            r["id"] = mapa[r["id_externo"]]
-
     lote = 500
     total = 0
-    for i in range(0, len(registros), lote):
-        chunk = registros[i : i + lote]
-        client.table("votacoes").upsert(chunk).execute()
+    for i in range(0, len(unicos), lote):
+        chunk = unicos[i : i + lote]
+        client.table("votacoes").upsert(
+            chunk, on_conflict="id_externo"
+        ).execute()
         total += len(chunk)
     log.info("upsert votacoes: %d registros", total)
     return total
@@ -149,22 +114,18 @@ def upsert_votacoes(registros: list[dict]) -> int:
 
 def upsert_votos(registros: list[dict]) -> int:
     """
-    Insere votos usando delete-then-insert por votacao_id.
-    Garante idempotência sem depender de on_conflict composto.
+    Insere votos. Usa delete-then-insert por votacao_id para evitar
+    dependência de on_conflict composto com FKs, que é frágil em
+    PostgREST quando os IDs são gerados pelo banco.
     """
     if not registros:
         return 0
     client = get_client()
 
-    # Coletar os votacao_ids afetados
     votacao_ids = list({r["votacao_id"] for r in registros})
-
-    # Deletar votos existentes dessas votações em lotes de 100
     for i in range(0, len(votacao_ids), 100):
-        chunk_ids = votacao_ids[i : i + 100]
-        client.table("votos").delete().in_("votacao_id", chunk_ids).execute()
+        client.table("votos").delete().in_("votacao_id", votacao_ids[i : i + 100]).execute()
 
-    # Inserir todos os votos em lotes de 1000
     lote = 1000
     total = 0
     for i in range(0, len(registros), lote):
@@ -196,9 +157,7 @@ def buscar_id_interno(tabela: str, id_externo: int, casa: str) -> int | None:
         .limit(1)
         .execute()
     )
-    if resp.data:
-        return resp.data[0]["id"]
-    return None
+    return resp.data[0]["id"] if resp.data else None
 
 
 def buscar_id_votacao(id_externo_votacao: str) -> int | None:
@@ -211,6 +170,4 @@ def buscar_id_votacao(id_externo_votacao: str) -> int | None:
         .limit(1)
         .execute()
     )
-    if resp.data:
-        return resp.data[0]["id"]
-    return None
+    return resp.data[0]["id"] if resp.data else None
