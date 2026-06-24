@@ -137,6 +137,38 @@ def upsert_votos(registros: list[dict]) -> int:
     return total
 
 
+def upsert_perfil(registros: list[dict]) -> int:
+    """
+    Insere ou atualiza perfis descritivos por parlamentar+tema (Sprint 3).
+    Chave lógica: (parlamentar_id, tema_cidadao).
+    """
+    if not registros:
+        return 0
+    unicos = _dedup(registros, "parlamentar_id", "tema_cidadao")
+    client = get_client()
+    lote = 500
+    total = 0
+    for i in range(0, len(unicos), lote):
+        chunk = unicos[i : i + lote]
+        client.table("perfil_parlamentar").upsert(
+            chunk, on_conflict="parlamentar_id,tema_cidadao"
+        ).execute()
+        total += len(chunk)
+    log.info("upsert perfil_parlamentar: %d registros", total)
+    return total
+
+
+def inserir_metricas(registro: dict) -> dict:
+    """
+    Insere uma linha de métricas de um treino de modelo (Sprint 3).
+    Append-only — mantém o histórico de runs em metricas_modelo.
+    """
+    client = get_client()
+    resp = client.table("metricas_modelo").insert(registro).execute()
+    log.info("inserir metricas_modelo: %s", registro.get("modelo"))
+    return resp.data[0] if resp.data else {}
+
+
 # ------------------------------------------------------------------ #
 # Helpers de leitura (usados no pipeline ML)
 # ------------------------------------------------------------------ #
