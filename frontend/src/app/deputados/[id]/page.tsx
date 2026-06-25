@@ -1,25 +1,20 @@
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 import { VotoAccordion } from '@/components/VotoAccordion'
+import { corAvatar, iniciais, posturaCor } from '@/lib/postura'
+import { resumoDeputado } from '@/lib/agregacao'
 import type { Parlamentar, PerfilParlamentar } from '@/types'
 
 export const revalidate = 3600
 
 export async function generateStaticParams() {
-  const { data } = await supabase
-    .from('parlamentares')
-    .select('id')
-    .eq('casa', 'camara')
+  const { data } = await supabase.from('parlamentares').select('id').eq('casa', 'camara')
   return (data ?? []).map((p) => ({ id: String(p.id) }))
 }
 
 async function getDeputado(id: number): Promise<Parlamentar | null> {
-  const { data } = await supabase
-    .from('parlamentares')
-    .select('*')
-    .eq('id', id)
-    .single()
+  const { data } = await supabase.from('parlamentares').select('*').eq('id', id).single()
   return data
 }
 
@@ -28,63 +23,101 @@ async function getPerfil(parlamentarId: number): Promise<PerfilParlamentar[]> {
     .from('perfil_parlamentar')
     .select('tema_cidadao, pct_favoravel, total_votacoes, postura_geral')
     .eq('parlamentar_id', parlamentarId)
-    .order('total_votacoes', { ascending: false })
+    .order('pct_favoravel', { ascending: false })
   return data ?? []
 }
 
-export default async function DeputadoPage({ params }: { params: Promise<{ id: string }> }) {
+interface PageProps {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ from?: string }>
+}
+
+export default async function DeputadoPage({ params, searchParams }: PageProps) {
   const { id: idStr } = await params
+  const { from } = await searchParams
   const id = Number(idStr)
   if (isNaN(id)) notFound()
 
   const [deputado, perfil] = await Promise.all([getDeputado(id), getPerfil(id)])
   if (!deputado) notFound()
 
+  const r = resumoDeputado(perfil)
+  const geral = r.posturaGeral ? posturaCor(r.posturaGeral) : null
+
+  // Botão voltar: se veio de um tema, volta para o ranking daquele tema
+  const voltaParaTema = from?.startsWith('/temas/')
+  const voltarHref = voltaParaTema ? from! : '/deputados'
+  const voltarLabel = voltaParaTema ? 'Voltar ao tema' : 'Todos os deputados'
+
   return (
-    <div className="space-y-8">
-      {/* Cabeçalho */}
-      <div className="flex items-center gap-5">
-        {deputado.foto_url ? (
-          <Image
-            src={deputado.foto_url}
-            alt={deputado.nome}
-            width={80}
-            height={80}
-            className="h-20 w-20 rounded-full object-cover"
-          />
-        ) : (
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gray-200 text-2xl font-bold text-gray-500">
-            {deputado.nome[0]}
-          </div>
-        )}
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{deputado.nome}</h1>
-          <p className="text-gray-500">
+    <main className="mx-auto max-w-[1080px] px-7 pb-[90px] pt-[34px]">
+      <div className="mb-6">
+        <Link
+          href={voltarHref}
+          className="inline-flex items-center gap-2.5 rounded-[30px] border-[1.5px] border-[#C9C5B8] bg-white px-5 py-2.5 text-[13px] font-semibold text-forest shadow-[0_3px_10px_-5px_rgba(19,53,47,.35)] transition-colors hover:border-forest hover:bg-forest hover:text-white"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2}>
+            <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          {voltarLabel}
+        </Link>
+      </div>
+
+      {/* Cabeçalho do deputado */}
+      <div className="mb-3.5 flex items-center gap-[22px] rounded-[18px] border border-line bg-white p-7">
+        <div
+          className="flex h-[88px] w-[88px] shrink-0 items-center justify-center rounded-full text-[30px] font-bold text-white"
+          style={{ background: corAvatar(deputado.id) }}
+        >
+          {iniciais(deputado.nome)}
+        </div>
+        <div className="flex-1">
+          <h1 className="font-serif text-[32px] font-medium tracking-[-.015em]">
+            {deputado.nome}
+          </h1>
+          <p className="mt-1.5 text-[15px] text-[#7A7D70]">
             {deputado.partido} · {deputado.uf}
           </p>
         </div>
+        {geral && (
+          <div className="border-l border-[#EDEAE0] pl-5 text-right">
+            <div className="text-[12px] uppercase tracking-[.05em] text-faint">Postura geral</div>
+            <div className="mt-1 text-[26px] font-bold" style={{ color: geral.texto }}>
+              {geral.label}
+            </div>
+            <div className="text-[13px] tabular-nums text-faint">
+              {r.media}% favorável na média
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Perfil por tema com accordion */}
-      <section>
-        <h2 className="mb-1 text-xl font-semibold text-gray-800">
-          Postura de voto por tema
-        </h2>
-        <p className="mb-4 text-sm text-gray-500">
-          Clique em um tema para ver as propostas votadas individualmente.
+      {perfil.length === 0 ? (
+        <p className="py-10 text-center text-muted">
+          Sem dados suficientes de votação (mínimo 3 votos por tema).
         </p>
-        {perfil.length === 0 ? (
-          <p className="text-gray-400">
-            Sem dados suficientes de votação (mínimo 3 votos por tema).
-          </p>
-        ) : (
-          <VotoAccordion parlamentarId={id} perfil={perfil} />
-        )}
-      </section>
+      ) : (
+        <>
+          {/* Legenda */}
+          <div className="my-4 flex items-center gap-2 px-0.5 text-[13px] text-[#7A7D70]">
+            <Legenda cor="#1F7A5C" texto="Favorável" />
+            <Legenda cor="#D7B45A" texto="Neutro" />
+            <Legenda cor="#BE4A2F" texto="Contrário" />
+            <span className="ml-auto">Toque num tema para ver as propostas votadas.</span>
+          </div>
 
-      <a href="/deputados" className="text-sm text-blue-600 hover:underline">
-        ← Voltar para todos os deputados
-      </a>
-    </div>
+          <VotoAccordion parlamentarId={id} perfil={perfil} />
+        </>
+      )}
+    </main>
+  )
+}
+
+function Legenda({ cor, texto }: { cor: string; texto: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span className="inline-block h-[11px] w-[11px] rounded-[3px]" style={{ background: cor }} />
+      {texto}
+    </span>
   )
 }
