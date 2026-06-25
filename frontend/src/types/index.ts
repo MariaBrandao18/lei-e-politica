@@ -17,6 +17,16 @@ export interface PerfilParlamentar {
   postura_geral: Postura
 }
 
+// Deputado com seus perfis por tema embutidos (embedded select do Supabase)
+export interface DeputadoComPerfil {
+  id: number
+  nome: string
+  partido: string
+  uf: string
+  foto_url: string | null
+  perfil_parlamentar: PerfilParlamentar[]
+}
+
 export interface MetricasModelo {
   id: number
   modelo: string
