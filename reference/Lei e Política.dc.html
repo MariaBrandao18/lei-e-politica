@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&amp;family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  ::selection { background: #1F7A5C; color: #fff; }
+</style>
+</helmet>
+<div style="min-height:100vh;background:#F4F2EC;font-family:'Public Sans',system-ui,sans-serif;color:#1A1B18;-webkit-font-smoothing:antialiased;">
+
+  <header style="position:sticky;top:0;z-index:20;background:#13352F;color:#F4F2EC;border-bottom:1px solid rgba(255,255,255,.08);">
+    <div style="max-width:1080px;margin:0 auto;padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:66px;">
+      <button onClick="{{ goInicio }}" style="display:flex;align-items:center;gap:11px;background:none;border:none;cursor:pointer;color:inherit;padding:0;">
+        <span style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;background:#E8B43A;color:#13352F;font-weight:700;font-size:17px;font-family:'Newsreader',serif;">L</span>
+        <span style="font-family:'Newsreader',serif;font-size:21px;font-weight:600;letter-spacing:-.01em;">Lei <span style="opacity:.55;font-style:italic;">&amp;</span> Política</span>
+      </button>
+      <nav style="display:flex;align-items:center;gap:4px;">
+        <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="3">
+          <button onClick="{{ item.onClick }}" style="{{ item.style }}">{{ item.label }}</button>
+        </sc-for>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============ INÍCIO ============ -->
+  <sc-if value="{{ isInicio }}" hint-placeholder-val="{{ true }}">
+  <main style="max-width:1080px;margin:0 auto;padding:0 28px 90px;">
+    <section style="padding:74px 0 54px;display:grid;grid-template-columns:1.15fr .85fr;gap:54px;align-items:center;">
+      <div>
+        <span style="display:inline-block;font-size:12.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#1F7A5C;margin-bottom:18px;">Transparência parlamentar com dados</span>
+        <h1 style="font-family:'Newsreader',serif;font-size:54px;line-height:1.04;font-weight:500;letter-spacing:-.02em;margin:0 0 20px;">Como cada deputado vota, tema por tema.</h1>
+        <p style="font-size:18px;line-height:1.6;color:#4A4D44;margin:0 0 30px;max-width:46ch;">Reunimos as votações da Câmara dos Deputados e mostramos, em linguagem clara, a postura de cada parlamentar em cada assunto — e usamos dados para prever como ele tende a votar.</p>
+        <div style="display:flex;gap:12px;">
+          <button onClick="{{ goDeputados }}" style="background:#13352F;color:#F4F2EC;border:none;border-radius:11px;padding:14px 24px;font:600 15px 'Public Sans',sans-serif;cursor:pointer;">Explorar deputados</button>
+          <button onClick="{{ goTemas }}" style="background:transparent;color:#13352F;border:1.5px solid #C9C5B8;border-radius:11px;padding:14px 24px;font:600 15px 'Public Sans',sans-serif;cursor:pointer;">Explorar temas</button>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #E2DED2;border-radius:18px;padding:24px;box-shadow:0 14px 40px -22px rgba(19,53,47,.4);">
+        <div style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#8A8D80;margin-bottom:14px;">Exemplo de leitura</div>
+        <sc-for list="{{ heroBars }}" as="b" hint-placeholder-count="4">
+          <div style="margin-bottom:13px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;">
+              <span style="font-size:14px;font-weight:500;">{{ b.tema }}</span>
+              <span style="font-size:13px;font-weight:700;color:{{ b.color }};font-variant-numeric:tabular-nums;">{{ b.pctLabel }}</span>
+            </div>
+            <div style="height:9px;background:#EFece2;border-radius:6px;overflow:hidden;">
+              <div style="height:100%;width:{{ b.pct }};background:{{ b.color }};border-radius:6px;"></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="padding:14px 0 10px;">
+      <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:26px;">
+        <h2 style="font-family:'Newsreader',serif;font-size:30px;font-weight:500;letter-spacing:-.01em;margin:0;">Como funciona</h2>
+        <span style="height:1px;flex:1;background:#DAD6C9;"></span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;">
+        <sc-for list="{{ steps }}" as="s" hint-placeholder-count="3">
+          <div style="background:#fff;border:1px solid #E2DED2;border-radius:15px;padding:26px 24px;">
+            <div style="font-family:'Newsreader',serif;font-size:34px;line-height:1;color:#E8B43A;font-weight:600;margin-bottom:14px;">{{ s.num }}</div>
+            <h3 style="font-size:17px;font-weight:600;margin:0 0 8px;">{{ s.title }}</h3>
+            <p style="font-size:14.5px;line-height:1.55;color:#5A5D53;margin:0;">{{ s.desc }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="margin-top:42px;background:#13352F;border-radius:18px;padding:34px 36px;color:#F4F2EC;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:24px;">
+        <h2 style="font-family:'Newsreader',serif;font-size:24px;font-weight:500;margin:0;">Transparência do modelo</h2>
+        <span style="font-size:13px;color:#9DB5AE;">RandomForest · corte temporal nas votações de 2024</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;">
+        <sc-for list="{{ metricas }}" as="m" hint-placeholder-count="4">
+          <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:13px;padding:20px;">
+            <div style="font-family:'Newsreader',serif;font-size:34px;font-weight:600;letter-spacing:-.01em;color:{{ m.color }};font-variant-numeric:tabular-nums;">{{ m.value }}</div>
+            <div style="font-size:13.5px;color:#9DB5AE;margin-top:4px;">{{ m.label }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </main>
+  </sc-if>
+
+  <!-- ============ DEPUTADOS ============ -->
+  <sc-if value="{{ isDeputados }}" hint-placeholder-val="{{ true }}">
+  <main style="max-width:1080px;margin:0 auto;padding:48px 28px 90px;">
+    <h1 style="font-family:'Newsreader',serif;font-size:38px;font-weight:500;letter-spacing:-.015em;margin:0 0 6px;">Deputados</h1>
+    <p style="font-size:16px;color:#5A5D53;margin:0 0 26px;">{{ totalLabel }} parlamentares · busque por nome, partido ou estado.</p>
+
+    <div style="position:relative;margin-bottom:14px;">
+      <svg style="position:absolute;left:16px;top:50%;transform:translateY(-50%);" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9D90" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3" stroke-linecap="round"></path></svg>
+      <input type="search" value="{{ busca }}" onInput="{{ onBusca }}" placeholder="Buscar deputado, partido ou UF…" style="width:100%;border:1.5px solid #DAD6C9;background:#fff;border-radius:13px;padding:15px 16px 15px 44px;font:500 15.5px 'Public Sans',sans-serif;color:#1A1B18;outline:none;">
+    </div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:26px;">
+      <sc-for list="{{ partidoChips }}" as="c" hint-placeholder-count="6">
+        <button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ semResultados }}" hint-placeholder-val="{{ false }}">
+      <p style="text-align:center;color:#9A9D90;padding:50px 0;font-size:15px;">Nenhum deputado encontrado para “{{ busca }}”.</p>
+    </sc-if>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+      <sc-for list="{{ depCards }}" as="d" hint-placeholder-count="9">
+        <button onClick="{{ d.onClick }}" style="text-align:left;background:#fff;border:1px solid #E2DED2;border-radius:15px;padding:18px;cursor:pointer;display:flex;flex-direction:column;gap:14px;transition:border-color .15s,box-shadow .15s;" style-hover="border-color:#13352F;box-shadow:0 10px 26px -18px rgba(19,53,47,.55);">
+          <div style="display:flex;align-items:center;gap:13px;">
+            <div style="width:50px;height:50px;border-radius:50%;background:{{ d.avatarBg }};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;flex-shrink:0;">
+              <span>{{ d.iniciais }}</span>
+            </div>
+            <div style="min-width:0;">
+              <div style="font-size:15.5px;font-weight:600;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ d.nome }}</div>
+              <div style="font-size:13px;color:#7A7D70;margin-top:2px;">{{ d.partidoUf }}</div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;height:8px;border-radius:5px;overflow:hidden;background:#EFece2;">
+              <div style="width:{{ d.favW }};background:#1F7A5C;"></div>
+              <div style="width:{{ d.neuW }};background:#D7B45A;"></div>
+              <div style="width:{{ d.conW }};background:#BE4A2F;"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:12px;color:#8A8D80;">
+              <span>Mais favorável: <b style="color:#1A1B18;font-weight:600;">{{ d.topTema }}</b></span>
+              <span style="font-variant-numeric:tabular-nums;">{{ d.mediaLabel }}</span>
+            </div>
+          </div>
+        </button>
+      </sc-for>
+    </div>
+  </main>
+  </sc-if>
+
+  <!-- ============ TEMAS (lista) ============ -->
+  <sc-if value="{{ isTemasList }}" hint-placeholder-val="{{ false }}">
+  <main style="max-width:1080px;margin:0 auto;padding:48px 28px 90px;">
+    <h1 style="font-family:'Newsreader',serif;font-size:38px;font-weight:500;letter-spacing:-.015em;margin:0 0 6px;">Temas das leis</h1>
+    <p style="font-size:16px;color:#5A5D53;margin:0 0 30px;max-width:62ch;">Escolha uma categoria e abra o ranking dos deputados — do mais favorável ao mais contrário àquele tema.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;">
+      <sc-for list="{{ temasList }}" as="t" hint-placeholder-count="10">
+        <button onClick="{{ t.onClick }}" style="text-align:left;background:#fff;border:1px solid #E2DED2;border-radius:16px;padding:22px 24px;cursor:pointer;display:flex;flex-direction:column;gap:16px;transition:border-color .15s,box-shadow .15s,transform .15s;" style-hover="border-color:#13352F;box-shadow:0 14px 32px -22px rgba(19,53,47,.6);transform:translateY(-2px);">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+            <div>
+              <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8A8D80;margin-bottom:5px;">Categoria</div>
+              <div style="font-family:'Newsreader',serif;font-size:24px;font-weight:600;line-height:1.08;">{{ t.tema }}</div>
+            </div>
+            <span style="font-size:13px;font-weight:700;color:#1F7A5C;font-variant-numeric:tabular-nums;white-space:nowrap;">{{ t.mediaLabel }} médio</span>
+          </div>
+          <div style="height:9px;background:#EFece2;border-radius:6px;overflow:hidden;">
+            <div style="height:100%;width:{{ t.mediaW }};background:#1F7A5C;border-radius:6px;"></div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #F0EDE3;padding-top:15px;">
+            <div style="display:flex;align-items:center;gap:11px;min-width:0;">
+              <div style="width:36px;height:36px;border-radius:50%;background:{{ t.topAvatarBg }};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12.5px;flex-shrink:0;">{{ t.topIniciais }}</div>
+              <div style="min-width:0;">
+                <div style="font-size:11px;color:#8A8D80;">Mais favorável</div>
+                <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ t.topNome }}</div>
+              </div>
+            </div>
+            <span style="font-size:13.5px;font-weight:700;color:#13352F;white-space:nowrap;">Ver ranking →</span>
+          </div>
+        </button>
+      </sc-for>
+    </div>
+  </main>
+  </sc-if>
+
+  <!-- ============ TEMA (detalhe / ranking) ============ -->
+  <sc-if value="{{ isTema }}" hint-placeholder-val="{{ false }}">
+  <main style="max-width:1080px;margin:0 auto;padding:34px 28px 90px;">
+    <div style="display:flex;justify-content:center;margin-bottom:24px;">
+      <button onClick="{{ goTemas }}" style="display:inline-flex;align-items:center;gap:9px;background:#fff;color:#13352F;border:1.5px solid #C9C5B8;border-radius:30px;padding:11px 24px;font:600 14.5px 'Public Sans',sans-serif;cursor:pointer;white-space:nowrap;box-shadow:0 3px 10px -5px rgba(19,53,47,.35);" style-hover="border-color:#13352F;background:#13352F;color:#fff;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        Todos os temas
+      </button>
+    </div>
+    <h1 style="font-family:'Newsreader',serif;font-size:38px;font-weight:500;letter-spacing:-.015em;margin:0 0 6px;text-align:center;">{{ temaAtual }}</h1>
+    <p style="font-size:16px;color:#5A5D53;margin:0 auto 26px;max-width:58ch;text-align:center;">Deputados ordenados de quem mais votou a favor a quem mais votou contra este tema.</p>
+
+    <div style="background:#fff;border:1px solid #E2DED2;border-radius:16px;overflow:hidden;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #EDEAE0;background:#FBFAF6;">
+        <div>
+          <div style="font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#8A8D80;">Categoria</div>
+          <div style="font-family:'Newsreader',serif;font-size:23px;font-weight:600;margin-top:2px;">{{ temaAtual }}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:12px;color:#8A8D80;">Média favorável</div>
+          <div style="font-size:21px;font-weight:700;color:#1F7A5C;font-variant-numeric:tabular-nums;">{{ temaMedia }}</div>
+        </div>
+      </div>
+      <sc-for list="{{ ranking }}" as="r" hint-placeholder-count="8">
+        <button onClick="{{ r.onClick }}" style="width:100%;text-align:left;display:grid;grid-template-columns:38px 46px 1fr 150px 64px;align-items:center;gap:14px;padding:13px 24px;background:none;border:none;border-top:1px solid #F0EDE3;cursor:pointer;" style-hover="background:#FBFAF6;">
+          <span style="font-family:'Newsreader',serif;font-size:20px;font-weight:600;color:{{ r.rankColor }};font-variant-numeric:tabular-nums;">{{ r.rank }}</span>
+          <div style="width:40px;height:40px;border-radius:50%;background:{{ r.avatarBg }};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">
+            <span>{{ r.iniciais }}</span>
+          </div>
+          <div style="min-width:0;">
+            <div style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.nome }}</div>
+            <div style="font-size:12.5px;color:#7A7D70;">{{ r.partidoUf }}</div>
+          </div>
+          <div style="height:9px;background:#EFece2;border-radius:6px;overflow:hidden;">
+            <div style="height:100%;width:{{ r.pct }};background:{{ r.barColor }};border-radius:6px;"></div>
+          </div>
+          <span style="text-align:right;font-size:16px;font-weight:700;color:{{ r.barColor }};font-variant-numeric:tabular-nums;">{{ r.pctLabel }}</span>
+        </button>
+      </sc-for>
+    </div>
+  </main>
+  </sc-if>
+
+  <!-- ============ PERFIL ============ -->
+  <sc-if value="{{ isPerfil }}" hint-placeholder-val="{{ false }}">
+  <main style="max-width:1080px;margin:0 auto;padding:34px 28px 90px;">
+    <div style="display:flex;justify-content:flex-start;margin-bottom:24px;">
+      <button onClick="{{ perfilVoltar }}" style="display: inline-flex; align-items: center; gap: 9px; background: #fff; color: #13352F; border: 1.5px solid #C9C5B8; border-radius: 30px; padding: 11px 24px; font: 600 14.5px 'Public Sans',sans-serif; cursor: pointer; white-space: nowrap; box-shadow: 0 3px 10px -5px rgba(19,53,47,.35); position: static; font-weight: 600; text-align: center; width: 170px; height: 10px; align-self: auto; font-size: 10.5px" style-hover="border-color:#13352F;background:#13352F;color:#fff;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        {{ perfilVoltarLabel }}
+      </button>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:22px;background:#fff;border:1px solid #E2DED2;border-radius:18px;padding:26px 28px;margin-bottom:14px;">
+      <div style="width:88px;height:88px;border-radius:50%;background:{{ perfilAvatarBg }};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:30px;flex-shrink:0;">
+        <span>{{ perfilIniciais }}</span>
+      </div>
+      <div style="flex:1;">
+        <h1 style="font-family:'Newsreader',serif;font-size:32px;font-weight:500;letter-spacing:-.015em;margin:0;">{{ perfilNome }}</h1>
+        <p style="font-size:15px;color:#7A7D70;margin:5px 0 0;">{{ perfilPartidoUf }}</p>
+      </div>
+      <div style="text-align:right;padding-left:20px;border-left:1px solid #EDEAE0;">
+        <div style="font-size:12px;color:#8A8D80;text-transform:uppercase;letter-spacing:.05em;">Postura geral</div>
+        <div style="font-size:26px;font-weight:700;color:{{ perfilGeralColor }};margin-top:3px;">{{ perfilGeralLabel }}</div>
+        <div style="font-size:13px;color:#8A8D80;font-variant-numeric:tabular-nums;">{{ perfilGeralPct }} favorável na média</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;font-size:13px;color:#7A7D70;margin:18px 2px 16px;align-items:center;">
+      <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:11px;height:11px;border-radius:3px;background:#1F7A5C;display:inline-block;"></span>Favorável</span>
+      <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:11px;height:11px;border-radius:3px;background:#D7B45A;display:inline-block;"></span>Neutro</span>
+      <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:11px;height:11px;border-radius:3px;background:#BE4A2F;display:inline-block;"></span>Contrário</span>
+      <span style="margin-left:auto;">Toque num tema para ver as propostas votadas.</span>
+    </div>
+
+    <div style="background:#fff;border:1px solid #E2DED2;border-radius:16px;overflow:hidden;">
+      <sc-for list="{{ perfilTemas }}" as="p" hint-placeholder-count="8">
+        <div style="border-top:1px solid #F0EDE3;">
+          <button onClick="{{ p.onToggle }}" style="width:100%;text-align:left;display:grid;grid-template-columns:1fr 200px 110px 22px;align-items:center;gap:16px;padding:16px 24px;background:none;border:none;cursor:pointer;" style-hover="background:#FBFAF6;">
+            <div>
+              <div style="font-size:16px;font-weight:600;">{{ p.tema }}</div>
+              <div style="font-size:12.5px;color:#8A8D80;margin-top:2px;">{{ p.votacoes }} votações analisadas</div>
+            </div>
+            <div style="height:9px;background:#EFece2;border-radius:6px;overflow:hidden;">
+              <div style="height:100%;width:{{ p.pct }};background:{{ p.color }};border-radius:6px;"></div>
+            </div>
+            <span style="display:flex;align-items:center;gap:8px;justify-content:flex-end;">
+              <span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:{{ p.tagBg }};color:{{ p.color }};">{{ p.posturaLabel }}</span>
+            </span>
+            <span style="display:flex;justify-content:flex-end;color:#B0B2A6;transform:{{ p.chevron }};transition:transform .2s;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </span>
+          </button>
+          <sc-if value="{{ p.aberto }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:4px 24px 18px;display:flex;flex-direction:column;gap:8px;">
+              <sc-for list="{{ p.propostas }}" as="v" hint-placeholder-count="3">
+                <div style="display:flex;gap:12px;align-items:flex-start;background:#FBFAF6;border:1px solid #EDEAE0;border-radius:11px;padding:12px 14px;">
+                  <span style="font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:6px;background:{{ v.tagBg }};color:{{ v.color }};white-space:nowrap;margin-top:1px;">{{ v.votoLabel }}</span>
+                  <div style="min-width:0;">
+                    <p style="font-size:13.5px;line-height:1.5;color:#33362E;margin:0;">{{ v.ementa }}</p>
+                    <p style="font-size:11.5px;color:#9A9D90;margin:3px 0 0;">{{ v.data }}</p>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </main>
+  </sc-if>
+
+  <footer style="border-top:1px solid #E2DED2;background:#FBFAF6;">
+    <div style="max-width:1080px;margin:0 auto;padding:26px 28px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:13px;color:#8A8D80;">
+      <span>Lei &amp; Política · MVP acadêmico — CEUB, Ciência de Dados</span>
+      <span>Fonte: Dados Abertos da Câmara dos Deputados</span>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+
+    this.temas = [
+      'Saúde', 'Educação', 'Segurança Pública', 'Meio Ambiente',
+      'Economia e Impostos', 'Direitos Sociais', 'Trabalho e Emprego',
+      'Infraestrutura', 'Agronegócio', 'Combate à Corrupção'
+    ];
+
+    const D = [
+      [220593, 'Abilio Brunini', 'PL', 'MT'],
+      [204379, 'Acácio Favacho', 'MDB', 'AP'],
+      [220714, 'Adail Filho', 'REPUBLICANOS', 'AM'],
+      [204560, 'Adolfo Viana', 'PSDB', 'BA'],
+      [204528, 'Adriana Ventura', 'NOVO', 'SP'],
+      [74646, 'Aécio Neves', 'PSDB', 'MG'],
+      [160508, 'Afonso Florence', 'PT', 'BA'],
+      [178835, 'Afonso Motta', 'PDT', 'RS'],
+      [160527, 'Aguinaldo Ribeiro', 'PP', 'PB'],
+      [204495, 'Airton Faleiro', 'PT', 'PA'],
+      [73579, 'Alberto Fraga', 'PL', 'DF'],
+      [160559, 'Alceu Moreira', 'MDB', 'RS'],
+      [121948, 'Adriano do Baldy', 'PP', 'GO'],
+      [221328, 'Adilson Barroso', 'PL', 'SP'],
+    ];
+
+    // viés por partido em cada tema (índice = posição em this.temas)
+    // ordem temas: Saúde, Educação, Segurança, MeioAmb, Economia, DireitosSoc, Trabalho, Infra, Agro, Corrupção
+    const lean = {
+      PT:           [22, 24, -18, 26, -8, 30, 22, 14, -10, 8],
+      PDT:          [16, 18, -6, 14, -2, 20, 18, 12, -2, 10],
+      PSDB:         [4, 6, 8, 2, 14, -2, 4, 10, 12, 12],
+      MDB:          [2, 2, 6, -2, 8, 0, 2, 14, 16, 4],
+      PP:           [-2, 0, 14, -10, 10, -6, 0, 12, 22, 2],
+      PL:           [-8, -4, 24, -18, 8, -16, -4, 8, 20, -4],
+      REPUBLICANOS: [-4, -2, 20, -12, 6, -10, -2, 10, 16, 0],
+      NOVO:         [-6, 2, 12, -8, 26, -14, -8, 4, 14, 16],
+    };
+    const palette = ['#13352F','#1F7A5C','#2E5F8A','#8A5A2B','#6B3F6E','#9A6B1E','#2B6E66','#7A3326'];
+
+    function hash(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
+    const clamp = (n) => Math.max(4, Math.min(97, Math.round(n)));
+
+    this.deps = D.map((d, di) => {
+      const [id, nome, partido, uf] = d;
+      const lv = lean[partido] || new Array(10).fill(0);
+      const perfil = this.temas.map((tema, ti) => {
+        const noise = (hash(nome + tema) % 26) - 13;
+        const pct = clamp(50 + lv[ti] + noise);
+        const votacoes = 5 + (hash(tema + nome) % 28);
+        return { tema, ti, pct, votacoes };
+      });
+      const media = Math.round(perfil.reduce((a, p) => a + p.pct, 0) / perfil.length);
+      const partes = nome.split(' ');
+      const iniciais = (partes[0][0] + (partes[1] ? partes[1][0] : '')).toUpperCase();
+      return {
+        id, nome, partido, uf, perfil, media, iniciais,
+        partidoUf: partido + ' · ' + uf,
+        foto: 'https://www.camara.leg.br/internet/deputado/bandep/' + id + '.jpg',
+        avatarBg: palette[di % palette.length],
+      };
+    });
+
+    this.state = {
+      screen: 'inicio',
+      busca: '',
+      partido: 'Todos',
+      tema: 0,
+      depId: null,
+      abertos: {},
+    };
+  }
+
+  go(screen) { this.setState({ screen }); window.scrollTo(0, 0); }
+
+  postura(pct) {
+    if (pct >= 60) return { key: 'fav', label: 'Favorável', color: '#1F7A5C', tagBg: '#E4F1EA' };
+    if (pct <= 42) return { key: 'con', label: 'Contrário', color: '#BE4A2F', tagBg: '#F8E6E0' };
+    return { key: 'neu', label: 'Neutro', color: '#B08A28', tagBg: '#F6EFDA' };
+  }
+
+  ementaFor(tema, voto) {
+    const banco = {
+      'Saúde': ['Amplia financiamento do SUS e cria piso para agentes de saúde', 'Institui programa nacional de combate a filas em hospitais', 'Reajusta tabela de procedimentos da rede pública'],
+      'Educação': ['Destina percentual mínimo do orçamento a creches', 'Cria programa de conectividade em escolas públicas', 'Atualiza piso salarial dos professores'],
+      'Segurança Pública': ['Endurece penas para crimes com arma de fogo', 'Cria fundo nacional de videomonitoramento urbano', 'Regula atuação das guardas municipais'],
+      'Meio Ambiente': ['Cria fundo de proteção a nascentes e mananciais', 'Restringe licenciamento em áreas de preservação', 'Institui metas de redução de emissões por setor'],
+      'Economia e Impostos': ['Simplifica tributos sobre o consumo', 'Isenta de imposto faixa de renda mais baixa', 'Cria incentivo fiscal para pequenos negócios'],
+      'Direitos Sociais': ['Amplia cobertura do auxílio para famílias vulneráveis', 'Garante licença ampliada a cuidadores', 'Cria política de moradia popular'],
+      'Trabalho e Emprego': ['Regulamenta trabalho por aplicativos', 'Cria incentivo para primeiro emprego do jovem', 'Atualiza regras de jornada e horas extras'],
+      'Infraestrutura': ['Destina recursos para saneamento básico', 'Autoriza concessão de rodovias federais', 'Cria programa de mobilidade urbana'],
+      'Agronegócio': ['Renegocia dívidas de produtores rurais', 'Cria seguro agrícola subsidiado', 'Flexibiliza registro de novos defensivos'],
+      'Combate à Corrupção': ['Aumenta transparência de emendas parlamentares', 'Endurece punição a desvio de verba pública', 'Cria cadastro nacional de empresas punidas'],
+    };
+    return (banco[tema] || ['Proposta legislativa em tramitação']);
+  }
+
+  renderVals() {
+    const s = this.state;
+    const screen = s.screen;
+
+    const hideImg = (e) => { e.target.style.display = 'none'; };
+
+    const navDef = [
+      ['inicio', 'Início'], ['deputados', 'Deputados'], ['temas', 'Temas'],
+    ];
+    const navItems = navDef.map(([key, label]) => {
+      const active = (screen === key) || (key === 'deputados' && screen === 'perfil') || (key === 'temas' && screen === 'tema');
+      return {
+        label, onClick: () => this.go(key),
+        style: 'background:' + (active ? 'rgba(232,180,58,.16)' : 'transparent') + ';color:' + (active ? '#E8B43A' : '#C8D6D1') + ';border:none;border-radius:9px;padding:9px 15px;font:600 14.5px \'Public Sans\',sans-serif;cursor:pointer;',
+      };
+    });
+
+    // ---------- INÍCIO ----------
+    const heroSrc = [['Saúde', 78], ['Segurança Pública', 34], ['Educação', 61], ['Meio Ambiente', 47]];
+    const heroBars = heroSrc.map(([tema, pct]) => {
+      const p = this.postura(pct);
+      return { tema, pct: pct + '%', pctLabel: pct + '%', color: p.color };
+    });
+    const steps = [
+      { num: '01', title: 'Coletamos as votações', desc: 'Reunimos os votos nominais do Plenário pela API aberta da Câmara e agrupamos as propostas em 10 temas do dia a dia.' },
+      { num: '02', title: 'Calculamos a postura', desc: 'Para cada deputado, medimos quanto ele votou a favor em cada tema e classificamos como favorável, neutro ou contrário.' },
+      { num: '03', title: 'Prevemos o voto', desc: 'Um modelo aprende com partido, estado e histórico para estimar como o parlamentar tende a votar em novas propostas.' },
+    ];
+    const metricas = [
+      { value: '74,2%', label: 'Acurácia da previsão', color: '#E8B43A' },
+      { value: '71,8%', label: 'F1 macro', color: '#F4F2EC' },
+      { value: '18.420', label: 'Votos no treino', color: '#F4F2EC' },
+      { value: '4.610', label: 'Votos no teste', color: '#F4F2EC' },
+    ];
+
+    // ---------- DEPUTADOS ----------
+    const q = s.busca.trim().toLowerCase();
+    let lista = this.deps.filter((d) =>
+      d.nome.toLowerCase().includes(q) || d.partido.toLowerCase().includes(q) || d.uf.toLowerCase().includes(q)
+    );
+    if (s.partido !== 'Todos') lista = lista.filter((d) => d.partido === s.partido);
+
+    const partidos = ['Todos', ...Array.from(new Set(this.deps.map((d) => d.partido)))];
+    const partidoChips = partidos.map((p) => {
+      const active = s.partido === p;
+      return {
+        label: p === 'Todos' ? 'Todos os partidos' : p,
+        onClick: () => this.setState({ partido: p }),
+        style: 'background:' + (active ? '#13352F' : '#fff') + ';color:' + (active ? '#fff' : '#5A5D53') + ';border:1.5px solid ' + (active ? '#13352F' : '#DAD6C9') + ';border-radius:20px;padding:7px 14px;font:600 13px \'Public Sans\',sans-serif;cursor:pointer;',
+      };
+    });
+
+    const depCards = lista.map((d) => {
+      const fav = d.perfil.filter((p) => p.pct >= 60).length;
+      const neu = d.perfil.filter((p) => p.pct > 42 && p.pct < 60).length;
+      const con = d.perfil.length - fav - neu;
+      const tot = d.perfil.length;
+      const top = d.perfil.slice().sort((a, b) => b.pct - a.pct)[0];
+      return {
+        nome: d.nome, partidoUf: d.partidoUf, iniciais: d.iniciais, foto: d.foto, avatarBg: d.avatarBg,
+        favW: (fav / tot * 100) + '%', neuW: (neu / tot * 100) + '%', conW: (con / tot * 100) + '%',
+        topTema: top.tema, mediaLabel: d.media + '% médio',
+        onClick: () => this.setState({ screen: 'perfil', depId: d.id, abertos: {}, voltarDe: 'deputados' }, () => window.scrollTo(0, 0)),
+      };
+    });
+
+    // ---------- RANKING ----------
+    const temaIdx = s.tema;
+    const temaNome = this.temas[temaIdx];
+    const temasList = this.temas.map((t, i) => {
+      const ranked = this.deps.map((d) => ({ d, pct: d.perfil[i].pct })).sort((a, b) => b.pct - a.pct);
+      const media = Math.round(ranked.reduce((a, r) => a + r.pct, 0) / ranked.length);
+      const top = ranked[0];
+      return {
+        tema: t, mediaLabel: media + '%', mediaW: media + '%',
+        topNome: top.d.nome, topIniciais: top.d.iniciais, topAvatarBg: top.d.avatarBg,
+        onClick: () => this.setState({ screen: 'tema', tema: i }, () => window.scrollTo(0, 0)),
+      };
+    });
+    const rankRaw = this.deps.map((d) => {
+      const p = d.perfil[temaIdx];
+      return { d, pct: p.pct, votacoes: p.votacoes };
+    }).sort((a, b) => b.pct - a.pct);
+    const temaMedia = Math.round(rankRaw.reduce((a, r) => a + r.pct, 0) / rankRaw.length) + '%';
+    const ranking = rankRaw.map((r, i) => {
+      const post = this.postura(r.pct);
+      const medalha = i === 0 ? '#C99A2E' : i === 1 ? '#9AA0A6' : i === 2 ? '#B5742E' : '#C2C0B6';
+      return {
+        rank: i + 1, rankColor: medalha,
+        nome: r.d.nome, partidoUf: r.d.partidoUf, iniciais: r.d.iniciais, foto: r.d.foto, avatarBg: r.d.avatarBg,
+        pct: r.pct + '%', pctLabel: r.pct + '%', barColor: post.color,
+        onClick: () => this.setState({ screen: 'perfil', depId: r.d.id, abertos: {}, voltarDe: 'tema' }, () => window.scrollTo(0, 0)),
+      };
+    });
+
+    // ---------- PERFIL ----------
+    const dep = this.deps.find((d) => d.id === s.depId) || this.deps[0];
+    const perfilOrdenado = dep.perfil.slice().sort((a, b) => b.pct - a.pct);
+    const geralPost = this.postura(dep.media);
+    const perfilTemas = perfilOrdenado.map((p) => {
+      const post = this.postura(p.pct);
+      const aberto = !!s.abertos[p.tema];
+      const ementas = this.ementaFor(p.tema);
+      const n = Math.min(3, Math.max(2, Math.round(p.votacoes / 6)));
+      const propostas = [];
+      for (let i = 0; i < n; i++) {
+        // distribui votos coerente com pct
+        const favVote = (i / n * 100) < p.pct;
+        const vp = favVote ? this.postura(70) : this.postura(30);
+        propostas.push({
+          ementa: ementas[i % ementas.length],
+          votoLabel: favVote ? 'Votou SIM' : 'Votou NÃO',
+          color: vp.color, tagBg: vp.tagBg,
+          data: ['12 mar 2024', '28 mai 2024', '04 set 2024', '19 nov 2024'][i % 4],
+        });
+      }
+      return {
+        tema: p.tema, votacoes: p.votacoes, pct: p.pct + '%', color: post.color, tagBg: post.tagBg,
+        posturaLabel: post.label, aberto, propostas,
+        chevron: aberto ? 'rotate(180deg)' : 'rotate(0deg)',
+        onToggle: () => this.setState((st) => ({ abertos: { ...st.abertos, [p.tema]: !st.abertos[p.tema] } })),
+      };
+    });
+
+    return {
+      navItems, hideImg,
+      goInicio: () => this.go('inicio'),
+      goDeputados: () => this.go('deputados'),
+      goTemas: () => this.go('temas'),
+      isInicio: screen === 'inicio',
+      isDeputados: screen === 'deputados',
+      isTemasList: screen === 'temas',
+      isTema: screen === 'tema',
+      isPerfil: screen === 'perfil',
+
+      heroBars, steps, metricas,
+
+      busca: s.busca,
+      onBusca: (e) => this.setState({ busca: e.target.value }),
+      partidoChips,
+      totalLabel: this.deps.length,
+      depCards,
+      semResultados: lista.length === 0,
+
+      temasList, temaAtual: temaNome, temaMedia, ranking,
+
+      perfilNome: dep.nome, perfilPartidoUf: dep.partidoUf, perfilIniciais: dep.iniciais,
+      perfilFoto: dep.foto, perfilAvatarBg: dep.avatarBg,
+      perfilGeralLabel: geralPost.label, perfilGeralColor: geralPost.color,
+      perfilGeralPct: dep.media + '%', perfilTemas,
+      perfilVoltar: () => this.go(s.voltarDe || 'deputados'),
+      perfilVoltarLabel: s.voltarDe === 'tema' ? 'Voltar ao tema' : 'Todos os deputados',
+    };
+  }
+}
+</script>
+</body>
+</html>

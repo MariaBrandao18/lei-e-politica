@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { PosturaTag } from './PosturaTag'
+import { posturaCor } from '@/lib/postura'
 import type { PerfilParlamentar, Postura } from '@/types'
 
 interface VotoDetalhe {
@@ -39,77 +39,83 @@ export function VotoAccordion({ parlamentarId, perfil }: Props) {
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-      {/* Cabeçalho da tabela */}
-      <div className="grid grid-cols-[1fr_120px_100px_80px_24px] gap-2 bg-gray-50 px-4 py-3 text-xs font-semibold uppercase text-gray-500">
-        <span>Tema</span>
-        <span className="text-center">Postura</span>
-        <span className="text-right">% Favorável</span>
-        <span className="text-right">Votações</span>
-        <span />
-      </div>
-
-      {perfil.map((p, i) => {
+    <div className="overflow-hidden rounded-2xl border border-line bg-white">
+      {perfil.map((p) => {
         const expandido = aberto === p.tema_cidadao
         const dados = votos[p.tema_cidadao] ?? []
         const loading = carregando === p.tema_cidadao
+        const c = posturaCor(p.postura_geral)
 
         return (
-          <div key={p.tema_cidadao} className={i > 0 ? 'border-t border-gray-100' : ''}>
+          <div key={p.tema_cidadao} className="border-t border-[#F0EDE3] first:border-t-0">
             {/* Linha clicável */}
             <button
               onClick={() => toggle(p.tema_cidadao)}
-              className="grid w-full grid-cols-[1fr_120px_100px_80px_24px] gap-2 px-4 py-3 text-left hover:bg-gray-50"
+              className="grid w-full grid-cols-[1fr_200px_110px_22px] items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-surface"
             >
-              <span className="font-medium text-gray-800">{p.tema_cidadao}</span>
-              <span className="flex justify-center">
-                <PosturaTag postura={p.postura_geral as Postura} />
-              </span>
-              <span className="text-right text-sm text-gray-700">
-                {p.pct_favoravel.toFixed(1)}%
-              </span>
-              <span className="text-right text-sm text-gray-500">{p.total_votacoes}</span>
-              <span className="flex items-center justify-end text-gray-400">
-                <svg
-                  className={`h-4 w-4 transition-transform ${expandido ? 'rotate-180' : ''}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
+              <div>
+                <div className="text-base font-semibold">{p.tema_cidadao}</div>
+                <div className="mt-0.5 text-[12.5px] text-faint">
+                  {p.total_votacoes} votações analisadas
+                </div>
+              </div>
+              <div className="h-[9px] overflow-hidden rounded-md bg-[#EFECE2]">
+                <div
+                  className="h-full rounded-md"
+                  style={{ width: `${p.pct_favoravel}%`, background: c.barra }}
+                />
+              </div>
+              <span className="flex justify-end">
+                <span
+                  className="rounded-full px-[9px] py-[3px] text-[11px] font-semibold"
+                  style={{ background: c.bg, color: c.texto }}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  {c.label}
+                </span>
+              </span>
+              <span
+                className="flex justify-end text-[#B0B2A6] transition-transform duration-200"
+                style={{ transform: expandido ? 'rotate(180deg)' : 'rotate(0deg)' }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2}>
+                  <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
             </button>
 
             {/* Conteúdo expandido */}
             {expandido && (
-              <div className="border-t border-gray-100 bg-gray-50 px-4 pb-3 pt-2">
+              <div className="flex flex-col gap-2 px-6 pb-[18px] pt-1">
                 {loading ? (
-                  <p className="py-4 text-center text-sm text-gray-400">Carregando...</p>
+                  <p className="py-4 text-center text-sm text-faint">Carregando…</p>
                 ) : dados.length === 0 ? (
-                  <p className="py-2 text-sm text-gray-400">Sem detalhes disponíveis.</p>
+                  <p className="py-2 text-sm text-faint">Sem detalhes disponíveis.</p>
                 ) : (
-                  <div className="space-y-2">
-                    {dados.map((v, idx) => (
+                  dados.map((v, idx) => {
+                    const favoravel = v.voto === 'favoravel'
+                    const vc = posturaCor((favoravel ? 'favoravel' : 'contrario') as Postura)
+                    return (
                       <div
                         key={idx}
-                        className="flex items-start gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2"
+                        className="flex items-start gap-3 rounded-[11px] border border-[#EDEAE0] bg-surface px-3.5 py-3"
                       >
-                        <div className="mt-0.5 shrink-0">
-                          <PosturaTag postura={v.voto as Postura} />
-                        </div>
+                        <span
+                          className="mt-px whitespace-nowrap rounded-md px-2 py-[3px] text-[10.5px] font-bold"
+                          style={{ background: vc.bg, color: vc.texto }}
+                        >
+                          {favoravel ? 'Votou SIM' : 'Votou NÃO'}
+                        </span>
                         <div className="min-w-0">
-                          <p className="line-clamp-2 text-sm text-gray-800">{v.ementa}</p>
+                          <p className="text-[13.5px] leading-relaxed text-[#33362E]">{v.ementa}</p>
                           {v.data && (
-                            <p className="mt-0.5 text-xs text-gray-400">
+                            <p className="mt-1 text-[11.5px] text-faint">
                               {new Date(v.data).toLocaleDateString('pt-BR')}
                             </p>
                           )}
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    )
+                  })
                 )}
               </div>
             )}
