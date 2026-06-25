@@ -1,34 +1,40 @@
 import type { Metadata } from 'next'
+import { Newsreader, Public_Sans } from 'next/font/google'
+import { SiteHeader } from '@/components/SiteHeader'
 import './globals.css'
 
+const serif = Newsreader({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  style: ['normal', 'italic'],
+  variable: '--font-serif',
+  display: 'swap',
+})
+
+const sans = Public_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-sans',
+  display: 'swap',
+})
+
 export const metadata: Metadata = {
-  title: 'Lei e Política',
+  title: 'Lei & Política',
   description:
-    'Acompanhe o comportamento de voto dos deputados federais por tema e descubra como a ciência de dados prevê posicionamentos parlamentares.',
+    'Transparência parlamentar com dados: como cada deputado federal vota, tema por tema, em linguagem clara.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR">
-      <body className="min-h-screen bg-gray-50 text-gray-900">
-        <header className="border-b border-gray-200 bg-white">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-            <a href="/" className="text-xl font-bold text-blue-700">
-              Lei e Política
-            </a>
-            <nav className="flex gap-6 text-sm font-medium text-gray-600">
-              <a href="/" className="hover:text-blue-700">
-                Início
-              </a>
-              <a href="/deputados" className="hover:text-blue-700">
-                Deputados
-              </a>
-            </nav>
+    <html lang="pt-BR" className={`${serif.variable} ${sans.variable}`}>
+      <body className="flex min-h-screen flex-col">
+        <SiteHeader />
+        <div className="flex-1">{children}</div>
+        <footer className="border-t border-line bg-surface">
+          <div className="mx-auto flex max-w-[1080px] flex-wrap justify-between gap-2.5 px-7 py-[26px] text-[13px] text-faint">
+            <span>Lei &amp; Política · MVP acadêmico — CEUB, Ciência de Dados</span>
+            <span>Fonte: Dados Abertos da Câmara dos Deputados</span>
           </div>
-        </header>
-        <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
-        <footer className="border-t border-gray-200 bg-white py-6 text-center text-xs text-gray-400">
-          Dados abertos da Câmara dos Deputados · Projeto acadêmico CEUB
         </footer>
       </body>
     </html>
