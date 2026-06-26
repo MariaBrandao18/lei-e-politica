@@ -25,3 +25,6 @@ frontend/node_modules/
 *.egg-info/
 dist/
 build/
+
+# Saidas de auditoria (geradas)
+data/audit/
