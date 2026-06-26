@@ -2,7 +2,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { VotoAccordion } from '@/components/VotoAccordion'
-import { corAvatar, iniciais, posturaCor } from '@/lib/postura'
+import { posturaCor } from '@/lib/postura'
+import { AvatarFoto } from '@/components/AvatarFoto'
 import { resumoDeputado } from '@/lib/agregacao'
 import type { Parlamentar, PerfilParlamentar } from '@/types'
 
@@ -65,12 +66,13 @@ export default async function DeputadoPage({ params, searchParams }: PageProps) 
 
       {/* Cabeçalho do deputado */}
       <div className="mb-3.5 flex items-center gap-[22px] rounded-[18px] border border-line bg-white p-7">
-        <div
-          className="flex h-[88px] w-[88px] shrink-0 items-center justify-center rounded-full text-[30px] font-bold text-white"
-          style={{ background: corAvatar(deputado.id) }}
-        >
-          {iniciais(deputado.nome)}
-        </div>
+        <AvatarFoto
+          nome={deputado.nome}
+          id={deputado.id}
+          fotoUrl={deputado.foto_url}
+          size={88}
+          fontSize="30px"
+        />
         <div className="flex-1">
           <h1 className="font-serif text-[32px] font-medium tracking-[-.015em]">
             {deputado.nome}

@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { corAvatar, iniciais } from '@/lib/postura'
 import { resumoDeputado } from '@/lib/agregacao'
+import { AvatarFoto } from '@/components/AvatarFoto'
 import type { DeputadoComPerfil } from '@/types'
 
 export function DeputadoCard({ deputado }: { deputado: DeputadoComPerfil }) {
@@ -13,12 +13,13 @@ export function DeputadoCard({ deputado }: { deputado: DeputadoComPerfil }) {
       className="flex flex-col gap-3.5 rounded-[15px] border border-line bg-white p-[18px] transition-all hover:border-forest hover:shadow-[0_10px_26px_-18px_rgba(19,53,47,.55)]"
     >
       <div className="flex items-center gap-3.5">
-        <div
-          className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-full text-[17px] font-bold text-white"
-          style={{ background: corAvatar(deputado.id) }}
-        >
-          {iniciais(deputado.nome)}
-        </div>
+        <AvatarFoto
+          nome={deputado.nome}
+          id={deputado.id}
+          fotoUrl={deputado.foto_url}
+          size={50}
+          fontSize="17px"
+        />
         <div className="min-w-0">
           <div className="truncate text-[15.5px] font-semibold leading-tight">
             {deputado.nome}
