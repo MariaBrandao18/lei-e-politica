@@ -54,14 +54,17 @@ REGRAS_NATUREZA: list[tuple[str, re.Pattern]] = [
         "A0_Administrativa",
         re.compile(
             r"\b(licenca|licencas)\b"                       # licenças parlamentares
-            r"|requer.{0,40}(informacoes|sejam prestadas)"  # requerimento de informação
-            r"|requerimento de informac"
+            r"|^\s*requer(o|emos)?\b"                       # ementa que COMEÇA com "Requer..."
+            r"|requer.{0,50}(informac|sejam prestadas|realizacao|audiencia"
+            r"|oitiva|retirada|comparecimento|convocacao|voto de|sessao)"
+            r"|requerimento de (informac|retirada)"
             r"|solicita.{0,20}informacoes"
             r"|votacao em separado|\bdestaque\b"            # destaques
             r"|regimento interno"
             r"|voto de (pesar|aplauso|repudio|congratulac|louvor)"  # votos cerimoniais
             r"|\bmocao\b"
             r"|requeiro|requer urgencia|retirada de tramitac"
+            r"|sessao (solene|especial)"                    # requerimentos de sessão
         ),
     ),
     (
