@@ -21,7 +21,7 @@ export function AvatarFoto({ nome, id, fotoUrl, size, fontSize }: Props) {
         alt={nome}
         width={size}
         height={size}
-        onError={() => setErro(true)}
+        onError={(e) => { e.preventDefault(); setErro(true) }}
         className="shrink-0 rounded-full object-cover"
         style={{ width: size, height: size }}
       />
