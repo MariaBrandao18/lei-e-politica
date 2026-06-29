@@ -3,7 +3,15 @@ import { notFound } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { buscarResumoTemas } from '@/lib/temas'
 import { RankingDeputado } from '@/components/RankingDeputado'
+import { ProposicoesTema } from '@/components/ProposicoesTema'
 import type { Postura } from '@/types'
+
+interface ProposicaoTema {
+  ementa: string
+  n_sim: number
+  n_nao: number
+  aprovada: boolean
+}
 
 export const revalidate = 3600
 
@@ -39,16 +47,20 @@ export default async function TemaPage({ params }: { params: Promise<{ slug: str
   const resumo = temas.find((t) => t.slug === slug)
   if (!resumo) notFound()
 
-  const { data } = await supabase
-    .from('perfil_parlamentar')
-    .select('pct_favoravel, total_votacoes, postura_geral, parlamentares(id, nome, partido, uf, foto_url)')
-    .eq('tema_cidadao', resumo.tema)
-    .order('pct_favoravel', { ascending: false })
+  const [{ data }, { data: propsData }] = await Promise.all([
+    supabase
+      .from('perfil_parlamentar')
+      .select('pct_favoravel, total_votacoes, postura_geral, parlamentares(id, nome, partido, uf, foto_url)')
+      .eq('tema_cidadao', resumo.tema)
+      .order('pct_favoravel', { ascending: false }),
+    supabase.rpc('proposicoes_do_tema', { p_tema: resumo.tema }),
+  ])
 
   const ranking = (data ?? []) as unknown as LinhaRanking[]
+  const proposicoes = (propsData ?? []) as ProposicaoTema[]
 
   return (
-    <main className="mx-auto max-w-[1080px] px-7 pb-[90px] pt-[34px]">
+    <main className="mx-auto max-w-[1280px] px-7 pb-[90px] pt-[34px]">
       <div className="mb-6 flex justify-center">
         <Link
           href="/temas"
@@ -65,40 +77,47 @@ export default async function TemaPage({ params }: { params: Promise<{ slug: str
         {resumo.tema}
       </h1>
       <p className="mx-auto mb-[26px] max-w-[58ch] text-center text-[16px] text-muted">
-        Clique num deputado para ver as leis que ele votou neste tema.
+        Deputados ordenados de quem mais votou a favor a quem mais votou contra este tema.
       </p>
 
-      <div className="overflow-hidden rounded-2xl border border-line bg-white">
-        {/* Cabeçalho do tema */}
-        <div className="flex items-center justify-between border-b border-[#EDEAE0] bg-surface px-6 py-5">
-          <div>
-            <div className="text-[12px] font-semibold uppercase tracking-[.07em] text-faint">
-              Categoria
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_340px]">
+        {/* Ranking de deputados */}
+        <div className="overflow-hidden rounded-2xl border border-line bg-white">
+          <div className="flex items-center justify-between border-b border-[#EDEAE0] bg-surface px-6 py-5">
+            <div>
+              <div className="text-[12px] font-semibold uppercase tracking-[.07em] text-faint">
+                Categoria
+              </div>
+              <div className="mt-0.5 font-serif text-[23px] font-semibold">{resumo.tema}</div>
             </div>
-            <div className="mt-0.5 font-serif text-[23px] font-semibold">{resumo.tema}</div>
+            <div className="text-right">
+              <div className="text-[12px] text-faint">Média favorável</div>
+              <div className="text-[21px] font-bold tabular-nums text-fav">{resumo.media}%</div>
+            </div>
           </div>
-          <div className="text-right">
-            <div className="text-[12px] text-faint">Média favorável</div>
-            <div className="text-[21px] font-bold tabular-nums text-fav">{resumo.media}%</div>
-          </div>
+
+          {ranking.map((r, i) => {
+            const dep = r.parlamentares
+            if (!dep) return null
+            return (
+              <RankingDeputado
+                key={dep.id}
+                rank={i + 1}
+                pct={Math.round(Number(r.pct_favoravel))}
+                postura={r.postura_geral}
+                dep={dep}
+                tema={resumo.tema}
+                slug={slug}
+                medalhaColor={medalha(i + 1)}
+              />
+            )
+          })}
         </div>
 
-        {ranking.map((r, i) => {
-          const dep = r.parlamentares
-          if (!dep) return null
-          return (
-            <RankingDeputado
-              key={dep.id}
-              rank={i + 1}
-              pct={Math.round(Number(r.pct_favoravel))}
-              postura={r.postura_geral}
-              dep={dep}
-              tema={resumo.tema}
-              slug={slug}
-              medalhaColor={medalha(i + 1)}
-            />
-          )
-        })}
+        {/* Proposições do tema */}
+        <div className="lg:sticky lg:top-6">
+          <ProposicoesTema proposicoes={proposicoes} />
+        </div>
       </div>
     </main>
   )
