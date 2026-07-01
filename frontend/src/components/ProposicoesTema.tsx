@@ -1,3 +1,9 @@
+'use client'
+
+import { useState } from 'react'
+
+const LIMITE_INICIAL = 3
+
 interface ProposicaoTema {
   ementa: string
   n_sim: number
@@ -49,7 +55,44 @@ function ItemProposicao({ prop, numero }: { prop: ProposicaoTema; numero: number
   )
 }
 
+function BotaoExpandir({
+  total,
+  expandido,
+  onToggle,
+}: {
+  total: number
+  expandido: boolean
+  onToggle: () => void
+}) {
+  const restantes = total - LIMITE_INICIAL
+  return (
+    <button
+      onClick={onToggle}
+      className="mt-1 flex items-center gap-1.5 text-[12px] font-semibold text-forest hover:underline"
+    >
+      {expandido ? (
+        <>
+          Mostrar menos
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+            <path d="M18 15l-6-6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </>
+      ) : (
+        <>
+          Mostrar mais ({restantes})
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+            <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </>
+      )}
+    </button>
+  )
+}
+
 export function ProposicoesTema({ proposicoes }: Props) {
+  const [aprovExpand, setAprovExpand] = useState(false)
+  const [rejExpand, setRejExpand] = useState(false)
+
   const aprovadas = proposicoes
     .filter((p) => p.aprovada)
     .sort((a, b) => b.n_sim - a.n_sim)
@@ -69,6 +112,9 @@ export function ProposicoesTema({ proposicoes }: Props) {
     )
   }
 
+  const aprovVisiveis = aprovExpand ? aprovadas : aprovadas.slice(0, LIMITE_INICIAL)
+  const rejVisiveis = rejExpand ? rejeitadas : rejeitadas.slice(0, LIMITE_INICIAL)
+
   return (
     <div className="rounded-2xl border border-line bg-white p-6">
       <h2 className="mb-0.5 font-serif text-[21px] font-semibold">Proposições do tema</h2>
@@ -84,9 +130,16 @@ export function ProposicoesTema({ proposicoes }: Props) {
               Mais bem votadas
             </span>
           </div>
-          {aprovadas.map((p, i) => (
+          {aprovVisiveis.map((p, i) => (
             <ItemProposicao key={i} prop={p} numero={i + 1} />
           ))}
+          {aprovadas.length > LIMITE_INICIAL && (
+            <BotaoExpandir
+              total={aprovadas.length}
+              expandido={aprovExpand}
+              onToggle={() => setAprovExpand((e) => !e)}
+            />
+          )}
         </section>
       )}
 
@@ -98,9 +151,16 @@ export function ProposicoesTema({ proposicoes }: Props) {
               Rejeitadas
             </span>
           </div>
-          {rejeitadas.map((p, i) => (
+          {rejVisiveis.map((p, i) => (
             <ItemProposicao key={i} prop={p} numero={i + 1} />
           ))}
+          {rejeitadas.length > LIMITE_INICIAL && (
+            <BotaoExpandir
+              total={rejeitadas.length}
+              expandido={rejExpand}
+              onToggle={() => setRejExpand((e) => !e)}
+            />
+          )}
         </section>
       )}
     </div>
