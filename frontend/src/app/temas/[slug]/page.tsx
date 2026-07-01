@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { buscarResumoTemas } from '@/lib/temas'
-import { RankingDeputado } from '@/components/RankingDeputado'
+import { RankingList } from '@/components/RankingList'
 import { ProposicoesTema } from '@/components/ProposicoesTema'
 import type { Postura } from '@/types'
 
@@ -31,13 +31,6 @@ interface LinhaRanking {
     uf: string
     foto_url: string | null
   } | null
-}
-
-function medalha(rank: number): string {
-  if (rank === 1) return '#C99A2E'
-  if (rank === 2) return '#9AA0A6'
-  if (rank === 3) return '#B5742E'
-  return '#C2C0B6'
 }
 
 export default async function TemaPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -96,22 +89,7 @@ export default async function TemaPage({ params }: { params: Promise<{ slug: str
             </div>
           </div>
 
-          {ranking.map((r, i) => {
-            const dep = r.parlamentares
-            if (!dep) return null
-            return (
-              <RankingDeputado
-                key={dep.id}
-                rank={i + 1}
-                pct={Math.round(Number(r.pct_favoravel))}
-                postura={r.postura_geral}
-                dep={dep}
-                tema={resumo.tema}
-                slug={slug}
-                medalhaColor={medalha(i + 1)}
-              />
-            )
-          })}
+          <RankingList ranking={ranking} tema={resumo.tema} slug={slug} />
         </div>
 
         {/* Proposições do tema */}
